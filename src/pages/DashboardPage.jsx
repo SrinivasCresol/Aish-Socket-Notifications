@@ -18,7 +18,7 @@ const DashboardPage = () => {
     if (!vendorId) return;
     try {
       const data = await getPendingOrders(vendorId);
-      setOrders(data);
+      setOrders(data.data.pendingOrders);
     } catch (err) {
       toast.error("Failed to fetch orders");
       console.error("❌ Failed to fetch orders:", err);
@@ -99,8 +99,7 @@ const DashboardPage = () => {
               <li key={o.orderId} className="py-2">
                 <div className="flex justify-between">
                   <span>
-                    <strong>Order:</strong> {o.orderId} | <strong>From:</strong>{" "}
-                    {o.userName}
+                    <strong>Order:</strong> {o.orderId}
                   </span>
                   <button
                     onClick={() => setActiveOrder(o)}
