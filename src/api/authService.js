@@ -12,3 +12,11 @@ export const loginVendor = async (data) => {
 export const logoutVendor = async (header) => {
   return await commonRequest("POST", `${BASE_URL}/auth/logout`, header);
 };
+
+export const userLogin = async (data) => {
+  return await commonRequest("POST", `${BASE_URL}/user/login`, data);
+};
+
+export const verifyUserOtp = async (data) => {
+  return await commonRequest("POST", `${BASE_URL}/user/verify-otp`, data);
+};

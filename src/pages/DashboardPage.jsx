@@ -36,7 +36,7 @@ const DashboardPage = () => {
     await logoutVendor();
     clearSession();
     toast.success("Logged out successfully");
-    navigate("/login");
+    navigate("/");
   };
 
   // ✅ Socket Handlers with toast feedback

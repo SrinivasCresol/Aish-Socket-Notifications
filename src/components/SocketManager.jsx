@@ -15,7 +15,7 @@ const SocketManager = ({ onNewOrder, onOrderRemoved, onOrderAccepted }) => {
 
     console.log("🔌 Connecting to socket:", SOCKET_URL);
 
-    const socket = io(SOCKET_URL, {
+    const socket = io(`${SOCKET_URL}/vendorOrders`, {
       query: { vendorId },
       transports: ["websocket"],
     });
