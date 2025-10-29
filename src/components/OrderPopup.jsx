@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { playAlertSound } from "../utils/soundUtils";
+import { Calendar, Clock } from "lucide-react";
 
 const OrderPopup = ({ order, onAccept, onReject, timeout = 30 }) => {
   const [timeLeft, setTimeLeft] = useState(timeout);
@@ -7,7 +8,6 @@ const OrderPopup = ({ order, onAccept, onReject, timeout = 30 }) => {
 
   useEffect(() => {
     if (!order) return;
-
     playAlertSound();
     setTimeLeft(timeout);
     setProgress(100);
@@ -18,7 +18,6 @@ const OrderPopup = ({ order, onAccept, onReject, timeout = 30 }) => {
         setProgress((next / timeout) * 100);
         if (next <= 0) {
           clearInterval(interval);
-          console.log("⏰ Auto-rejecting order:", order.orderId);
           onReject(order.orderId);
         }
         return next;
@@ -30,61 +29,90 @@ const OrderPopup = ({ order, onAccept, onReject, timeout = 30 }) => {
 
   if (!order) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white p-6 rounded-2xl shadow-xl w-[90%] max-w-md text-center">
-        <h2 className="text-2xl font-bold mb-2">🧪 New Order Request</h2>
-        <p className="text-gray-600 mb-4">
-          New order from <strong>{order.userName}</strong>
-        </p>
+  // Format date & time
+  const appointmentDate = new Date(order.appointmentDate).toLocaleDateString(
+    "en-GB",
+    {
+      weekday: "short",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }
+  );
 
-        <div className="flex justify-center mb-6">
-          <div className="w-24 h-24 relative">
-            <svg className="w-24 h-24 transform -rotate-90">
-              <circle
-                cx="48"
-                cy="48"
-                r="44"
-                stroke="#e5e7eb"
-                strokeWidth="8"
-                fill="transparent"
-              />
-              <circle
-                cx="48"
-                cy="48"
-                r="44"
-                stroke="#10b981"
-                strokeWidth="8"
-                fill="transparent"
-                strokeDasharray="276"
-                strokeDashoffset={(progress / 100) * 276}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-xl font-semibold">
-              {timeLeft}s
+  const appointmentTime = order.timeSlot
+    ? `${order.timeSlot} AM`
+    : "Not specified";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-[#0E8A8A] text-white p-5 rounded-3xl shadow-2xl w-[380px]">
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">New Order</h2>
+            <div
+              onClick={() => onReject(order.orderId)}
+              className="cursor-pointer text-gray-300 hover:text-white text-xl"
+            >
+              ✕
             </div>
           </div>
-        </div>
 
-        <div className="flex justify-center gap-4">
-          <button
-            onClick={() => onReject(order.orderId)}
-            className="px-5 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-          >
-            Reject
-          </button>
+          {/* Appointment Details */}
+          <div className="bg-white/10 rounded-xl p-4 flex justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              <div>
+                <p className="text-sm opacity-80">Appointments Date</p>
+                <p className="font-semibold">{appointmentDate}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              <div>
+                <p className="text-sm opacity-80">Appointments Time</p>
+                <p className="font-semibold">{appointmentTime}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Customer Info */}
+          <div className="bg-white rounded-xl flex items-center gap-3 p-3">
+            <img
+              src={order.customerProfilePic}
+              alt={order.customerName}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <div>
+              <p className="text-gray-900 font-semibold">
+                {order.customerName}
+              </p>
+              <p className="text-gray-500 text-sm">
+                {order.items?.map((i) => i.serviceDetails.name).join(", ")}
+              </p>
+            </div>
+          </div>
+
+          {/* View Button */}
           <button
             onClick={() => onAccept(order.orderId)}
-            className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="bg-white text-[#0E8A8A] py-2 rounded-xl font-medium hover:bg-gray-100 transition"
           >
             Accept
           </button>
-        </div>
 
-        <p className="text-xs text-gray-500 mt-4">
-          Expires in {timeout} seconds.
-        </p>
+          {/* Progress / Countdown */}
+          <div className="text-center text-sm opacity-80 mt-2">
+            Auto reject in {timeLeft}s
+          </div>
+          <div className="w-full bg-white/30 rounded-full h-2">
+            <div
+              className="bg-white h-2 rounded-full transition-all"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </div>
       </div>
     </div>
   );
