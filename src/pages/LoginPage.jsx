@@ -1,23 +1,33 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { loginVendor } from "../api/authService";
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { saveSession } from "../utils/storageUtils";
+import { loginApiMap } from "../utils/loginHandler";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { search } = useLocation();
+  const role = new URLSearchParams(search).get("role");
+
+  if (!role || !loginApiMap[role]) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-red-600 text-xl">Invalid Role Selected</p>
+      </div>
+    );
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
     try {
-      const res = await loginVendor({ email, password });
-      console.log(res);
+      const loginFn = loginApiMap[role];
+      const res = await loginFn({ email, password });
+
       if (res?.status === 200) {
-        saveSession(res.data.token, res.data.roleID);
+        saveSession(res.data.token, res.data.roleId);
         navigate("/dashboard");
       } else {
         setError(res?.message || "Invalid credentials");
@@ -33,7 +43,9 @@ const LoginPage = () => {
         onSubmit={handleLogin}
         className="bg-white p-6 rounded-xl shadow-md w-96"
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Vendor Login</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center capitalize">
+          {role} Login
+        </h2>
         {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
         <input
           type="email"
