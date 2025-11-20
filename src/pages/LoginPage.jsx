@@ -27,7 +27,7 @@ const LoginPage = () => {
       const res = await loginFn({ email, password });
 
       if (res?.status === 200) {
-        saveSession(res.data.token, res.data.roleId);
+        saveSession(res.data.token, res.data.roleID);
         navigate("/dashboard");
       } else {
         setError(res?.message || "Invalid credentials");
